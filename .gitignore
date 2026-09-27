@@ -1,0 +1,72 @@
+# ==============================
+# .NET / C# build outputs
+# ==============================
+
+bin/
+obj/
+
+# ==============================
+# Visual Studio
+# ==============================
+
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+
+# ==============================
+# Build / Debug files
+# ==============================
+
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
+# ==============================
+# .NET generated files
+# ==============================
+
+*.dll
+*.exe
+*.pdb
+*.cache
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+
+# ==============================
+# Test / coverage results
+# ==============================
+
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# ==============================
+# OS generated files
+# ==============================
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+
+# ==============================
+# Temporary / backup files
+# ==============================
+
+*.tmp
+*.temp
+*.bak
+*.log
+*~
