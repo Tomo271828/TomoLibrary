@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TomoLibrary;
 
-namespace TomoLibrary.VP
+namespace TomoLibrary.DataStructure
 {
     public class SlopeTrick
     {
