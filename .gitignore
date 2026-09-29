@@ -70,3 +70,5 @@ Desktop.ini
 *.bak
 *.log
 *~
+
+/HelloWorld.cs
