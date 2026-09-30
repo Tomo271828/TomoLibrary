@@ -262,7 +262,6 @@ namespace TomoLibrary.ML
         public static long[] ConvolutionFast(long[] a, long[] b)
         {
             int n = 1;
-            long mod = 998244353;
             while (n < (int)(a.Length + b.Length - 1))
             {
                 n <<= 1;
@@ -271,20 +270,20 @@ namespace TomoLibrary.ML
             int[] b2 = new int[n];
             for (int i = 0; i <= a.Length - 1; i++)
             {
-                a2[i] = (int)(a[i] % mod);
+                a2[i] = (int)(a[i] % 998244353);
             }
             for (int i = 0; i <= b.Length - 1; i++)
             {
-                b2[i] = (int)(b[i] % mod);
+                b2[i] = (int)(b[i] % 998244353);
             }
             NTTFast(a2, n, false);
             NTTFast(b2, n, false);
             for (int i = 0; i <= n - 1; i++)
             {
-                a2[i] = (int)((long)a2[i] * (long)b2[i] % mod);
+                a2[i] = (int)((long)a2[i] * (long)b2[i] % 998244353);
             }
-            b2 = null;
-            GC.Collect();
+            //b2 = null;
+            //GC.Collect();
             NTTFast(a2, n, true);
             long[] ret = new long[a.Length + b.Length - 1];
             for (int i = 0; i <= a.Length + b.Length - 2; i++)
@@ -310,14 +309,12 @@ namespace TomoLibrary.ML
                     (a[i], a[k]) = (a[k], a[i]);
                 }
             }
-            long r = 3;
-            long mod = 998244353;
             for (int len = 2; len <= n; len <<= 1)
             {
-                long wlen = TomoLibrary.ML.Modulo.ModPow(r, (mod - 1) / len, mod);
+                long wlen = TomoLibrary.ML.Modulo.ModPow(3, 998244352 / len, 998244353);
                 if (invert)
                 {
-                    wlen = TomoLibrary.ML.Modulo.ModInv(wlen, mod);
+                    wlen = TomoLibrary.ML.Modulo.ModInv(wlen, 998244353);
                 }
                 for (int i = 0; i <= n - 1; i += len)
                 {
@@ -325,19 +322,19 @@ namespace TomoLibrary.ML
                     for (int j = 0; j <= len / 2 - 1; ++j)
                     {
                         long u = a[i + j];
-                        long v = (long)a[i + j + len / 2] * w % mod;
-                        a[i + j] = (int)((u + v) % mod);
-                        a[i + j + len / 2] = (int)((u - v + mod) % mod);
-                        w = wlen * w % mod;
+                        long v = (long)a[i + j + len / 2] * w % 998244353;
+                        a[i + j] = (int)((u + v) % 998244353);
+                        a[i + j + len / 2] = (int)((u - v + 998244353) % 998244353);
+                        w = wlen * w % 998244353;
                     }
                 }
             }
             if (invert)
             {
-                long invn = TomoLibrary.ML.Modulo.ModInv(n, mod);
+                long invn = TomoLibrary.ML.Modulo.ModInv(n, 998244353);
                 for (int i = 0; i <= a.Length - 1; i++)
                 {
-                    a[i] = (int)((long)a[i] * invn % mod);
+                    a[i] = (int)((long)a[i] * invn % 998244353);
                 }
             }
         }
