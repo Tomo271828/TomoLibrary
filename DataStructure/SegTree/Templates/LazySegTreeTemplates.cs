@@ -144,19 +144,20 @@ namespace TomoLibrary.DataStructure.SegTree.Templates
         }
     }
     //Range Add Range Sum
-    public class RARS : ILazySegmentTree<long, long>
+    //1要素目が総和、2要素目が要素数
+    public class RARS : ILazySegmentTree<(long, long), long>
     {
-        public long Op(long a, long b)
+        public (long, long) Op((long, long) a, (long, long) b)
         {
-            return a + b;
+            return (a.Item1 + b.Item1, a.Item2 + b.Item2);
         }
-        public long E()
+        public (long, long) E()
         {
-            return 0;
+            return (0, 0);
         }
-        public long Mapping(long f, long x)
+        public (long, long) Mapping(long f, (long, long) x)
         {
-            return f + x;
+            return (x.Item1 + f * x.Item2, x.Item2);
         }
         public long Composition(long f, long g)
         {
@@ -167,19 +168,19 @@ namespace TomoLibrary.DataStructure.SegTree.Templates
             return 0;
         }
     }
-    public class RARSmod998244353 : ILazySegmentTree<long, long>
+    public class RARSmod998244353 : ILazySegmentTree<(long, long), long>
     {
-        public long Op(long a, long b)
+        public (long, long) Op((long, long) a, (long, long) b)
         {
-            return (a + b) % 998244353;
+            return ((a.Item1 + b.Item1) % 998244353, a.Item2 + b.Item2);
         }
-        public long E()
+        public (long, long) E()
         {
-            return 0;
+            return (0, 0);
         }
-        public long Mapping(long f, long x)
+        public (long, long) Mapping(long f, (long, long) x)
         {
-            return (f + x) % 998244353;
+            return ((x.Item1 + f * x.Item2) % 998244353, x.Item2);
         }
         public long Composition(long f, long g)
         {
@@ -190,19 +191,19 @@ namespace TomoLibrary.DataStructure.SegTree.Templates
             return 0;
         }
     }
-    public class RARSmod1000000007 : ILazySegmentTree<long, long>
+    public class RARSmod1000000007 : ILazySegmentTree<(long, long), long>
     {
-        public long Op(long a, long b)
+        public (long, long) Op((long, long) a, (long, long) b)
         {
-            return (a + b) % 1000000007;
+            return ((a.Item1 + b.Item1) % 1000000007, a.Item2 + b.Item2);
         }
-        public long E()
+        public (long, long) E()
         {
-            return 0;
+            return (0, 0);
         }
-        public long Mapping(long f, long x)
+        public (long, long) Mapping(long f, (long, long) x)
         {
-            return (f + x) % 1000000007;
+            return ((x.Item1 + f * x.Item2) % 1000000007, x.Item2);
         }
         public long Composition(long f, long g)
         {
