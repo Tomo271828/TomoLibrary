@@ -41,6 +41,17 @@ namespace TomoLibrary
                 Console.WriteLine("Aoki");
             }
         }
+        public static void AliceBob(bool answer)
+        {
+            if (answer)
+            {
+                Console.WriteLine("Alice");
+            }
+            else
+            {
+                Console.WriteLine("Bob");
+            }
+        }
         public static void IntMap(int[,] answer)
         {
             int h = answer.GetLength(0);
