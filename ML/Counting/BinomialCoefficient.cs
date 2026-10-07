@@ -61,7 +61,21 @@ namespace TomoLibrary.ML.Counting
             {
                 ret += (ret * -1 / mod + 1) * mod;
             }
-            return ret %= mod;
+            return ret % mod;
+        }
+        //nPk
+        public long Permutation(long n, long k)
+        {
+            if (n < k || n < 0 || k < 0)
+            {
+                return 0;
+            }
+            long ret = fact[n] * fact_inv[n - k] % mod;
+            while (ret < 0)
+            {
+                ret += mod;
+            }
+            return ret;
         }
     }
 }

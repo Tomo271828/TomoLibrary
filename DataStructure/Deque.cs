@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,55 +12,61 @@ namespace TomoLibrary.DataStructure
     public class Deque<T>
     {
         T[] arr;
+        int head;
         int count;
+        int mask;
         int capacity;
-        int topindex;
-        int bottomindex;
-        public T this[int index] { get { return ElementAt(index); } }
-        public Deque()
+        public T this[int index]
         {
-            capacity = 65536;
-            topindex = 0;
-            bottomindex = capacity - 1;
+            get
+            {
+                if ((uint)index >= (uint)count)
+                {
+                    throw new IndexOutOfRangeException();
+                }
+                return arr[(head + index) & mask];
+            }
+        }
+        public int Count { get { return count; } }
+        public Deque(int capacity = 65536)
+        {
+            capacity = (int)BitOperations.RoundUpToPowerOf2((uint)capacity);
+            this.capacity = capacity;
+            head = 0;
             count = 0;
+            mask = capacity - 1;
             arr = new T[capacity];
         }
         void Expansion()
         {
             T[] newarr = new T[capacity * 2];
-            for(int i = 0;i <= topindex - 1; i++)
+            for (int i = 0; i <= count - 1; i++)
             {
-                newarr[i] = arr[i];
+                newarr[i] = arr[(head + i) & mask];
             }
-            for(int i = bottomindex + 1;i <= capacity - 1; i++)
-            {
-                newarr[capacity + i] = arr[i];
-            }
-            bottomindex += capacity;
-            capacity *= 2;
+            head = 0;
+            capacity <<= 1;
+            mask = capacity - 1;
             arr = newarr;
         }
         public void PushLast(T item)
         {
-            arr[topindex] = item;
-            topindex += 1;
-            topindex %= capacity;
-            if(topindex == bottomindex)
+            if (count == capacity)
             {
                 Expansion();
             }
-            count += 1;
+            arr[(head + count) & mask] = item;
+            count++;
         }
         public void PushFirst(T item)
         {
-            arr[bottomindex] = item;
-            bottomindex += capacity - 1;
-            bottomindex %= capacity;
-            if(topindex == bottomindex)
+            if (count == capacity)
             {
                 Expansion();
             }
-            count += 1;
+            head = (head - 1) & mask;
+            arr[head] = item;
+            count++;
         }
         public T PopLast()
         {
@@ -65,10 +74,8 @@ namespace TomoLibrary.DataStructure
             {
                 throw new ArgumentException("要素が含まれていません!");
             }
-            topindex += capacity - 1;
-            topindex %= capacity;
-            count -= 1;
-            return arr[topindex];
+            count--;
+            return arr[(head + count) & mask];
         }
         public T PopFirst()
         {
@@ -76,10 +83,9 @@ namespace TomoLibrary.DataStructure
             {
                 throw new ArgumentException("要素が含まれていません!");
             }
-            bottomindex += 1;
-            bottomindex %= capacity;
-            count -= 1;
-            return arr[bottomindex];
+            count--;
+            head++;
+            return arr[(head - 1) & mask];
         }
         public T PeekLast()
         {
@@ -87,10 +93,7 @@ namespace TomoLibrary.DataStructure
             {
                 throw new ArgumentException("要素が含まれていません!");
             }
-            int index = topindex;
-            index += capacity - 1;
-            index %= capacity;
-            return arr[index];
+            return arr[(head + count - 1) & mask];
         }
         public T PeekFirst()
         {
@@ -98,24 +101,15 @@ namespace TomoLibrary.DataStructure
             {
                 throw new ArgumentException("要素が含まれていません!");
             }
-            int index = bottomindex;
-            index += 1;
-            index %= capacity;
-            return arr[index];
-        }
-        public int GetCount()
-        {
-            return count;
+            return arr[head & mask];
         }
         public T ElementAt(int index)
         {
-            if(index >= count)
+            if((uint)index >= (uint)count)
             {
                 throw new IndexOutOfRangeException();
             }
-            index = bottomindex + index + 1;
-            index %= capacity;
-            return arr[index];
+            return arr[(head + index) & mask];
         }
     }
 }
