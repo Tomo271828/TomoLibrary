@@ -223,9 +223,9 @@ namespace TomoLibrary.DataStructure.SegTree
                 }
                 if (func.F(operations.Op(sum, data[l])) == false)
                 {
-                    Push(l);
                     while (l < size)
                     {
+                        Push(l);
                         l *= 2;
                         if (func.F(operations.Op(sum, data[l])))
                         {
