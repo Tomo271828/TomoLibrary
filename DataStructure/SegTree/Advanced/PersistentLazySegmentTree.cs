@@ -5,8 +5,9 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using TomoLibrary.DataStructure.SegTree.Interface;
 
-namespace TomoLibrary.DataStructure.SegTree
+namespace TomoLibrary.DataStructure.SegTree.Advanced
 {
     public class PersistentLazySegmentTree<T,V>
     {
@@ -130,37 +131,7 @@ namespace TomoLibrary.DataStructure.SegTree
             return NewNode(node.value, node.lazy, node.LChild, node.RChild);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        int Push(int idx)
-        {
-            ref Node node = ref nodes[idx];
-            if (node.lazy.Equals(id))
-            {
-                return idx;
-            }
-            idx = Clone(idx);
-            node = ref nodes[idx];
-            if(node.LChild != -1)
-            {
-                int lc = Clone(node.LChild);
-                node = ref nodes[idx];
-                node.LChild = lc;
-                ref Node l = ref nodes[node.LChild];
-                l.lazy = operations.Composition(node.lazy, l.lazy);
-            }
-            if(node.RChild != -1)
-            {
-                int rc = Clone(node.RChild);
-                node = ref nodes[idx];
-                node.RChild = rc;
-                ref Node r = ref nodes[node.RChild];
-                r.lazy = operations.Composition(node.lazy, r.lazy);
-            }
-            node.value = operations.Mapping(node.lazy, node.value);
-            node.lazy = id;
-            return idx;
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void PushMutable(int idx)
+        void Push(int idx)
         {
             V f = nodes[idx].lazy;
             if (f.Equals(id))
@@ -211,8 +182,8 @@ namespace TomoLibrary.DataStructure.SegTree
                 nodes[idx].lazy = operations.Composition(lazy, nodes[idx].lazy);
                 return idx;
             }
-            PushMutable(idx);
-            int center = (a + b) >> 1;
+            Push(idx);
+            int center = a + b >> 1;
             int lc = Apply(nodes[idx].LChild, a, center, l, r, lazy);
             int rc = Apply(nodes[idx].RChild, center, b, l, r, lazy);
             nodes[idx].LChild = lc;
@@ -236,7 +207,7 @@ namespace TomoLibrary.DataStructure.SegTree
             {
                 return operations.Mapping(f, node.value);
             }
-            int center = (a + b) >> 1;
+            int center = a + b >> 1;
             T vl = Get(node.LChild, a, center, l, r, f);
             T vr = Get(node.RChild, center, b, l, r, f);
             return operations.Op(vl, vr);
@@ -272,7 +243,7 @@ namespace TomoLibrary.DataStructure.SegTree
             }
             V tf = operations.Composition(tlazy, nodes[t].lazy);
             V sf = operations.Composition(slazy, nodes[s].lazy);
-            int center = (a + b) >> 1;
+            int center = a + b >> 1;
             int lc = Copy(nodes[t].LChild, nodes[s].LChild, a, center, l, r, tf, sf);
             int rc = Copy(nodes[t].RChild, nodes[s].RChild, center, b, l, r, tf, sf);
             T lv = operations.Mapping(nodes[lc].lazy, nodes[lc].value);

@@ -5,9 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TomoLibrary.ARR;
-using TomoLibrary.DataStructure;
 
-namespace TomoLibrary.DataStructure.SegTree
+namespace TomoLibrary.DataStructure.SegTree.Advanced
 {
     //0-index
     public class DynamicMergeSortTree

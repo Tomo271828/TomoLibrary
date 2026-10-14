@@ -1,79 +1,88 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using System.Runtime.CompilerServices;
-using TomoLibrary;
+using TomoLibrary.DataStructure.SegTree.Interface;
 
-namespace TomoLibrary.DataStructure.SegTree
+namespace TomoLibrary.DataStructure.SegTree.Advanced
 {
-    public class ReversibleSegmentTree<T>
+    //区間反転と区間更新が可換である必要あり
+    public class ReversibleLazySegmentTree<T, V>
     {
+        static Random rnd = new Random();
+        ILazySegmentTree<T, V> operations;
+        T e;
+        V id;
         struct Node
         {
             public T value;
             public T dat;
             public T revdat;
+            public V lazy;
             public int LChild;
             public int RChild;
             public int count;
             public int priority;
             public bool rev;
+            public bool hasLazy;
         }
         Node[] nodearr;
         int next;
+        int root;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         int NewNode(T val)
         {
-            int id = next;
-            next += 1;
-            int cap = nodearr.Length;
-            if (cap <= id)
+            int nodeId = next;
+            next++;
+            if (nodearr.Length <= nodeId)
             {
-                cap *= 2;
-                Array.Resize(ref nodearr, cap);
+                Array.Resize(ref nodearr, nodearr.Length * 2);
             }
-            ref Node node = ref nodearr[id];
+            ref Node node = ref nodearr[nodeId];
             node.value = val;
             node.dat = val;
             node.revdat = val;
+            node.lazy = id;
+            node.hasLazy = false;
+            node.LChild = 0;
+            node.RChild = 0;
             node.count = 1;
             node.rev = false;
             node.priority = rnd.Next();
-            return id;
+            return nodeId;
         }
-        static Random rnd = new Random();
-        ISegmentTree<T> operations;
-        T e;
-        int root;
-        public ReversibleSegmentTree(ISegmentTree<T> operations, T[] arr, int querycount = 200000)
+        public ReversibleLazySegmentTree(ILazySegmentTree<T, V> operations, T[] arr, int querycount = 200000)
         {
             this.operations = operations;
             e = operations.E();
+            id = operations.Id();
             next = 1;
             root = 0;
             int cap = arr.Length + querycount + 1;
             nodearr = new Node[cap];
-            nodearr[0] = new Node();
             nodearr[0].count = 0;
             nodearr[0].dat = e;
             nodearr[0].revdat = e;
+            nodearr[0].lazy = id;
+            nodearr[0].hasLazy = false;
             Build(arr);
         }
-        public ReversibleSegmentTree(ISegmentTree<T> operations, int n, int querycount = 200000)
+        public ReversibleLazySegmentTree(ILazySegmentTree<T, V> operations, int n, int querycount = 200000)
         {
             this.operations = operations;
             e = operations.E();
+            id = operations.Id();
             next = 1;
             root = 0;
             int cap = n + querycount + 1;
             nodearr = new Node[cap];
-            nodearr[0] = new Node();
             nodearr[0].count = 0;
             nodearr[0].dat = e;
             nodearr[0].revdat = e;
+            nodearr[0].lazy = id;
+            nodearr[0].hasLazy = false;
             T[] arr = new T[n];
             for (int i = 0; i <= n - 1; i++)
             {
@@ -141,16 +150,43 @@ namespace TomoLibrary.DataStructure.SegTree
             node.rev = !node.rev;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void Push(int id)
+        void ApplyLazy(int nodeId, V f)
         {
-            ref Node node = ref nodearr[id];
-            if (!nodearr[id].rev)
+            if (nodeId == 0)
             {
                 return;
             }
-            ApplyRev(node.RChild);
-            ApplyRev(node.LChild);
-            node.rev = false;
+            ref Node node = ref nodearr[nodeId];
+            node.value = operations.Mapping(f, node.value);
+            node.dat = operations.Mapping(f, node.dat);
+            node.revdat = operations.Mapping(f, node.revdat);
+            if (node.hasLazy)
+            {
+                node.lazy = operations.Composition(f, node.lazy);
+            }
+            else
+            {
+                node.lazy = f;
+                node.hasLazy = true;
+            }
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        void Push(int nodeId)
+        {
+            ref Node node = ref nodearr[nodeId];
+            if (node.rev)
+            {
+                ApplyRev(node.RChild);
+                ApplyRev(node.LChild);
+                node.rev = false;
+            }
+            if (node.hasLazy)
+            {
+                ApplyLazy(node.RChild, node.lazy);
+                ApplyLazy(node.LChild, node.lazy);
+                node.lazy = id;
+                node.hasLazy = false;
+            }
         }
         int Merge(int l, int r)
         {
@@ -247,11 +283,11 @@ namespace TomoLibrary.DataStructure.SegTree
             }
             return ret;
         }
-        public void Set(int index, T value)
+        public void SetIndex(int index, T value)
         {
-            root = Set(root, index, value);
+            root = SetIndex(root, index, value);
         }
-        int Set(int id, int index, T val)
+        int SetIndex(int id, int index, T val)
         {
             Push(id);
             ref Node node = ref nodearr[id];
@@ -259,7 +295,7 @@ namespace TomoLibrary.DataStructure.SegTree
             int lc = l.count;
             if (lc > index)
             {
-                node.LChild = Set(node.LChild, index, val);
+                node.LChild = SetIndex(node.LChild, index, val);
             }
             else if (lc == index)
             {
@@ -267,7 +303,7 @@ namespace TomoLibrary.DataStructure.SegTree
             }
             else
             {
-                node.RChild = Set(node.RChild, index - lc - 1, val);
+                node.RChild = SetIndex(node.RChild, index - lc - 1, val);
             }
             return Update(id);
         }
@@ -294,6 +330,13 @@ namespace TomoLibrary.DataStructure.SegTree
                     index -= lc + 1;
                 }
             }
+        }
+        public void Apply(int l, int r, V f)
+        {
+            Split(root, l, out int a, out int b);
+            Split(b, r - l, out int c, out int d);
+            ApplyLazy(c, f);
+            root = Merge(a, Merge(c, d));
         }
         //挿入した要素がindex番目(0-indexed)に来るように要素を挿入
         public void InsertAt(int index, T value)

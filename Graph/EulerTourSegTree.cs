@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TomoLibrary;
 using TomoLibrary.DataStructure.SegTree;
+using TomoLibrary.DataStructure.SegTree.Interface;
 
 namespace TomoLibrary.Graph
 {

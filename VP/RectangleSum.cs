@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using TomoLibrary;
 using TomoLibrary.ARR;
 using TomoLibrary.DataStructure.SegTree;
+using TomoLibrary.DataStructure.SegTree.Interface;
 
 namespace TomoLibrary.VP
 {

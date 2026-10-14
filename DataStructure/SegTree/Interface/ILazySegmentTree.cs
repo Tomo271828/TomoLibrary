@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TomoLibrary.DataStructure.SegTree
+namespace TomoLibrary.DataStructure.SegTree.Interface
 {
     public interface ILazySegmentTree<T,V>
     {

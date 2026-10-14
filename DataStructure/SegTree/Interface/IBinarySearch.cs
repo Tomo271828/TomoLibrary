@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TomoLibrary.DataStructure.SegTree
+namespace TomoLibrary.DataStructure.SegTree.Interface
 {
-    public interface ISegmentTree<T>
+    public interface IBinarySearch<T>
     {
-        public T Op(T a, T b);
-        public T E();
+        public bool F(T value);
     }
 }
