@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -172,6 +173,174 @@ namespace TomoLibrary.Graph
                 return (-1, null);
             }
             return (size, ae);
+        }
+        //頂点数64以下のみ
+        public List<int> MinimumVertexCover()
+        {
+            if (n > 64)
+            {
+                throw new ArgumentOutOfRangeException(nameof(n), "頂点数は64以下である必要があります。");
+            }
+            ulong[] adj = new ulong[n];
+            ulong forced = 0;
+            foreach (Edge e in allEdge)
+            {
+                int s = e.start;
+                int g = e.goal;
+                if (s == g)
+                {
+                    forced |= 1UL << s;
+                }
+                else
+                {
+                    adj[s] |= 1UL << g;
+                    adj[g] |= 1UL << s;
+                }
+            }
+            ulong all = ulong.MaxValue;
+            if (n != 64)
+            {
+                all = (1UL << n) - 1;
+            }
+            int PopCount(ulong mask)
+            {
+                return BitOperations.PopCount(mask);
+            }
+            int First(ulong mask)
+            {
+                return BitOperations.TrailingZeroCount(mask);
+            }
+            ulong SolveLowDegree(ulong mask)
+            {
+                ulong ret = 0;
+                ulong unseen = mask;
+                while (unseen != 0)
+                {
+                    int root = First(unseen);
+                    ulong component = 0;
+                    ulong front = 1UL << root;
+                    while (front != 0)
+                    {
+                        int v = First(front);
+                        ulong bit = 1UL << v;
+                        front &= ~bit;
+                        if ((component & bit) != 0)
+                        {
+                            continue;
+                        }
+                        component |= bit;
+                        front |= adj[v] & mask & ~component;
+                    }
+                    unseen &= ~component;
+                    int start = root;
+                    bool cycle = true;
+                    ulong scan = component;
+                    while (scan != 0)
+                    {
+                        int v = First(scan);
+                        scan &= scan - 1;
+                        int deg = PopCount(adj[v] & component);
+                        if (deg <= 1)
+                        {
+                            start = v;
+                            cycle = false;
+                            break;
+                        }
+                    }
+                    List<int> order = new List<int>();
+                    int now = start;
+                    int pre = -1;
+                    while (true)
+                    {
+                        order.Add(now);
+                        ulong nextmask = adj[now] & component;
+                        if (pre != -1)
+                        {
+                            nextmask &= ~(1UL << pre);
+                        }
+                        if (nextmask == 0)
+                        {
+                            break;
+                        }
+                        int next = First(nextmask);
+                        if (next == start)
+                        {
+                            break;
+                        }
+                        pre = now;
+                        now = next;
+                    }
+                    int offset = 1;
+                    if (cycle && order.Count % 2 == 1)
+                    {
+                        offset = 0;
+                    }
+                    for (int i = offset; i < order.Count; i += 2)
+                    {
+                        ret |= 1UL << order[i];
+                    }
+                }
+                return ret;
+            }
+            ulong Solve(ulong mask)
+            {
+                if (mask == 0)
+                {
+                    return 0;
+                }
+                int select = -1;
+                int maxdeg = 2;
+                ulong scan = mask;
+                while (scan != 0)
+                {
+                    int v = First(scan);
+                    scan &= scan - 1;
+                    int deg = PopCount(adj[v] & mask);
+                    if (deg > maxdeg)
+                    {
+                        maxdeg = deg;
+                        select = v;
+                    }
+                }
+                if (select == -1)
+                {
+                    return SolveLowDegree(mask);
+                }
+                ulong bit = 1UL << select;
+                ulong nei = adj[select] & mask;
+                ulong a = Solve(mask & ~bit) | bit;
+                ulong b = Solve(mask & ~(bit | nei)) | nei;
+                return PopCount(a) < PopCount(b) ? a : b;
+            }
+            ulong result = forced | Solve(all & ~forced);
+            List<int> answer = new List<int>();
+            for (int i = 0; i <= n - 1; i++)
+            {
+                if ((result & (1UL << i)) != 0)
+                {
+                    answer.Add(i);
+                }
+            }
+            return answer;
+        }
+        //頂点数64以下のみ
+        public List<int> MaximumIndependentSet()
+        {
+            List<int> mvc = MinimumVertexCover();
+            bool[] check = new bool[n];
+            for (int i = 0; i <= mvc.Count - 1; i++)
+            {
+                check[mvc[i]] = true;
+            }
+            List<int> answer = new List<int>();
+            for (int i = 0; i <= n - 1; i++)
+            {
+                if (check[i] == false)
+                {
+                    answer.Add(i);
+                }
+            }
+            return answer;
         }
     }
 }
